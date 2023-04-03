@@ -5,40 +5,18 @@ const width = 800;
 const tree = d3.tree().nodeSize([dx, dy])
 const diagonal = d3.linkHorizontal().x(d => d.y).y(d => d.x)
 
-const data = d3.json('./language-tree.json')
+const data = d3.json('./data/prepped-language-tree.json')
 
-const restructureJSON = (JSON) => {
-  let root = JSON.Root ? JSON.Root : JSON;
-  if(root.Node) {
-    if(root.Node.Label) { root.name = root.Node.Label }
-    if(root.Node.LanguageTreeId) { root.id = root.Node.LanguageTreeId } 
-    if(root.Node.Language) { root.language = root.Node.Language }   
-    delete root.Node
-  }
- 
-  let children = []
-
-  if(root.Children) {
-    for(let i = 0; i < root.Children.length; i ++ ){
-      children.push(restructureJSON(root.Children[i]))
-    }
-    delete root.Children
-  }
-
-  root.children = children;
-
-  return root;
-}
+const clearSVG = () => d3.select("svg").remove()
 
 const chart = (data) =>  {
   const root = d3.hierarchy(data);
 
-
   root.x0 = dy / 2;
   root.y0 = 0;
   root.descendants().forEach((d, i) => {
-    d.id = i;
-    d._children = d.children;
+      d.id = i;
+      d._children = d.children;
   });
 
   const svg = d3.select("#chartWrapper")
@@ -154,6 +132,13 @@ const chart = (data) =>  {
   return svg.node();
 }
 
-data
-.then(res =>  restructureJSON(res))
+const showTree = () => data
+.then(res => {
+  clearSVG()
+  return res
+})
 .then(res => chart(res))
+  
+const showTimeline = () => clearSVG()
+
+const showMap = () => clearSVG()
